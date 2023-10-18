@@ -10,28 +10,55 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+model User {
+    id          String           @id @default(uuid())
+    createdAt   DateTime         @default(now())
+    updatedAt   DateTime         @updatedAt
+    name        String           @db.VarChar(20)
+    email       String           @unique
+    password    String
+    expenses    Expense[]
+    preferences UserPreferences?
+}
+
+model UserPreferences {
+    id                 String   @id @default(uuid())
+    emailNotifications Boolean?
+    User               User     @relation(fields: [userId], references: [id])
+    userId             String   @unique
+}
+
 model Expense {
-    id          String   @id @default(uuid())
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
-    name        String
-    amount      Float
-    category    Category @relation(fields: [categoryID], references: [id])
-    categoryID  String
-    subCategory String?
+    id            String       @id @default(uuid())
+    createdAt     DateTime     @default(now())
+    updatedAt     DateTime     @updatedAt
+    name          String       @db.VarChar(30)
+    amount        Float
+    category      Category     @relation(fields: [categoryID], references: [id])
+    categoryID    String
+    User          User         @relation(fields: [userId], references: [id])
+    userId        String
+    SubCategory   SubCategory? @relation(fields: [subCategoryId], references: [id])
+    subCategoryId String?
 }
 
 model Category {
-    id        String    @id @default(uuid())
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    name      String
-    budget    Float?
-    Expense   Expense[]
+    id          String        @id @default(uuid())
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+    name        String        @db.VarChar(30)
+    budget      Float?
+    expense     Expense[]
+    subCategory SubCategory[]
 }
 
-model subCategory {
-    id        String   @id @default(uuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model SubCategory {
+    id         String    @id @default(uuid())
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
+    Category   Category  @relation(fields: [categoryId], references: [id])
+    categoryId String
+    name       String    @db.VarChar(30)
+    budget     Float?
+    expense    Expense[]
 }
